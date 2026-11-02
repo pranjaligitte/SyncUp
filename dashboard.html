@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>SyncUp — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="index.css"/>
+<style>
+.dash{max-width:80rem;margin:6rem auto 2rem;padding:0 2rem}
+.dash-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:2rem;flex-wrap:wrap;gap:1rem}
+.dash-welcome h1{font-size:2rem;font-weight:800;letter-spacing:-.03em}
+.dash-welcome p{color:var(--on-surface-variant);font-size:.95rem}
+.dash-badge{display:inline-flex;align-items:center;gap:.4rem;padding:.4rem .8rem;border-radius:9999px;font-size:.75rem;font-weight:700}
+.dash-badge.verified{background:rgba(74,222,128,.1);color:#4ade80}
+.dash-badge.unverified{background:rgba(255,107,107,.1);color:#ff6b6b}
+.dash-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem}
+.dash-card{padding:2rem;border-radius:1.5rem;transition:background .4s}
+.dash-card:hover{background:var(--surface-bright)}
+.dash-card__header{display:flex;align-items:center;gap:.75rem;margin-bottom:1.25rem}
+.dash-card__icon{width:2.5rem;height:2.5rem;border-radius:.6rem;display:flex;align-items:center;justify-content:center;background:rgba(241,212,255,.1);color:var(--primary)}
+.dash-card__title{font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700}
+.dash-card__body{color:var(--on-surface-variant);font-size:.9rem;line-height:1.6}
+.post-form{margin-bottom:2rem}
+.post-input{width:100%;padding:1rem 1.25rem;border-radius:1rem;border:1px solid rgba(255,255,255,.05);background:var(--surface-highest);color:var(--on-surface);font-family:'Manrope',sans-serif;font-size:.95rem;resize:none;min-height:80px;outline:none;transition:border .3s}
+.post-input:focus{border-color:rgba(224,176,255,.3)}
+.post-actions{display:flex;justify-content:flex-end;margin-top:.75rem}
+.feed-post{padding:1.5rem;border-radius:1rem;margin-bottom:1rem}
+.feed-post__author{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem}
+.feed-post__avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-container));display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:var(--on-primary)}
+.feed-post__name{font-weight:700;font-size:.9rem}
+.feed-post__headline{font-size:.75rem;color:var(--on-surface-variant)}
+.feed-post__content{font-size:.9rem;line-height:1.6;margin-bottom:1rem}
+.feed-post__actions{display:flex;gap:1.5rem}
+.feed-post__action{display:flex;align-items:center;gap:.3rem;color:var(--on-surface-variant);font-size:.8rem;cursor:pointer;transition:color .2s;background:none;border:none;font-family:inherit}
+.feed-post__action:hover{color:var(--primary)}
+.tab-bar{display:flex;gap:.5rem;margin-bottom:2rem;overflow-x:auto;padding-bottom:.5rem}
+.tab-btn{padding:.6rem 1.2rem;border-radius:9999px;border:1px solid rgba(255,255,255,.06);background:transparent;color:var(--on-surface-variant);font-family:'Manrope',sans-serif;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .3s;white-space:nowrap}
+.tab-btn.active{background:linear-gradient(135deg,var(--primary),var(--primary-container));color:var(--on-primary);border-color:transparent}
+.section-block{margin-bottom:3rem}
+.section-block h2{font-size:1.5rem;font-weight:800;letter-spacing:-.02em;margin-bottom:1.5rem}
+.ref-code{display:flex;align-items:center;gap:.75rem;padding:1rem 1.25rem;border-radius:.75rem;background:var(--surface-highest);margin:1rem 0}
+.ref-code input{flex:1;background:transparent;border:none;color:var(--primary);font-family:'Space Grotesk',sans-serif;font-size:1.1rem;font-weight:700;outline:none}
+.ref-code button{padding:.5rem 1rem;font-size:.8rem}
+.milestone-row{display:flex;align-items:center;gap:1rem;padding:.75rem 0}
+.milestone-row__progress{flex:1;height:6px;background:var(--surface-highest);border-radius:9999px;overflow:hidden}
+.milestone-row__fill{height:100%;background:linear-gradient(90deg,var(--secondary-container),var(--primary));border-radius:9999px}
+.milestone-row__label{min-width:80px;font-size:.85rem;font-weight:600;color:var(--primary)}
+.milestone-row__reward{font-size:.8rem;color:var(--on-surface-variant);min-width:100px;text-align:right}
+</style>
+</head>
+<body>
+<div class="atmosphere" aria-hidden="true"><div class="atmo-orb atmo-orb--1"></div><div class="atmo-orb atmo-orb--2"></div></div>
+<nav class="nav"><div class="nav__inner">
+  <a href="/" class="nav__logo">SyncUp</a>
+  <div class="nav__links">
+    <a href="/" class="nav__link">Home</a>
+    <a href="/dashboard" class="nav__link nav__link--active">Dashboard</a>
+  </div>
+  <button class="btn btn--glass btn--nav" onclick="logout()" id="logout-btn">Sign Out</button>
+</div></nav>
+
+<div class="dash">
+  <div class="dash-header">
+    <div class="dash-welcome">
+      <h1 id="welcome-name">Welcome back</h1>
+      <p id="welcome-sub">Your professional command center</p>
+    </div>
+    <div>
+      <span class="dash-badge" id="verify-badge">Loading...</span>
+      <span class="dash-badge" id="trust-badge" style="margin-left:.5rem;background:rgba(224,176,255,.1);color:var(--primary)">Trust: 0</span>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('feed')">Feed</button>
+    <button class="tab-btn" onclick="switchTab('jobs')">Jobs</button>
+    <button class="tab-btn" onclick="switchTab('events')">Events</button>
+    <button class="tab-btn" onclick="switchTab('referrals')">Referrals</button>
+    <button class="tab-btn" onclick="switchTab('companies')">Companies</button>
+    <button class="tab-btn" onclick="switchTab('b2b')">B2B Services</button>
+    <button class="tab-btn" onclick="switchTab('opportunities')">Investments</button>
+    <button class="tab-btn" onclick="switchTab('ai')">✨ AI Assistant</button>
+    <button class="tab-btn" onclick="switchTab('profile')">Profile</button>
+    <button class="tab-btn" id="admin-tab-btn" style="display:none;background:var(--primary);color:var(--on-primary)" onclick="switchTab('admin')">Admin</button>
+  </div>
+
+  <!-- FEED TAB -->
+  <div id="tab-feed" class="section-block">
+    <div class="post-form glass-panel" style="padding:1.5rem;border-radius:1.5rem">
+      <textarea class="post-input" id="post-content" placeholder="Share a professional update..."></textarea>
+      <div class="post-actions"><button class="btn btn--gradient" onclick="createPost()">Publish</button></div>
+    </div>
+    <div id="feed-list"></div>
+  </div>
+
+  <!-- JOBS TAB -->
+  <div id="tab-jobs" class="section-block" style="display:none">
+    <h2>Experienced Professional Jobs</h2>
+    <div id="jobs-list" class="dash-grid"></div>
+  </div>
+
+  <!-- EVENTS TAB -->
+  <div id="tab-events" class="section-block" style="display:none">
+    
+    <!-- Prominent Host Event Call-To-Action -->
+    <div id="host-event-cta" class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(167,139,250,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(167,139,250,0.3); text-align: center; padding: 2.5rem;">
+      <div style="font-size: 3.5rem; color: #a78bfa; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3.5rem;">event_available</span></div>
+      <h2 style="margin-bottom: 0.5rem;">Host a Professional Event</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Connect with the SyncUp community. From hackathons to workshops, host events with **SyncEscrow** protection. Your payouts are secured and attendees are verified.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2.5rem;" onclick="document.getElementById('host-event-form').style.display='block'; document.getElementById('host-event-cta').style.display='none';">+ Create Event Listing</button>
+    </div>
+
+    <!-- Host Event Form -->
+    <div id="host-event-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #a78bfa;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Event Details & Escrow Config</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('host-event-form').style.display='none'; document.getElementById('host-event-cta').style.display='block';">Cancel</button>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Event Title</label>
+          <input class="form-input" id="event-title" placeholder="e.g. AI Strategy Workshop" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Event Type</label>
+          <select class="form-input" id="event-type">
+            <option value="hackathon">Hackathon</option>
+            <option value="workshop">Workshop</option>
+            <option value="conference">Conference</option>
+            <option value="networking">Networking</option>
+            <option value="hiring">Hiring</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input class="form-input" type="date" id="event-date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Ticket Price (₹)</label>
+          <input class="form-input" type="number" id="event-price" value="0" />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Description</label>
+          <textarea class="post-input" id="event-desc" placeholder="What will attendees learn?" style="min-height:80px"></textarea>
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Cancellation Policy</label>
+          <select class="form-input" id="event-policy">
+            <option value="full-refund">Full Refund (Safe for attendees)</option>
+            <option value="partial-refund">Partial Refund (50%)</option>
+            <option value="no-refund">No Refund (High risk)</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem; display:flex; gap:1rem; align-items:center;">
+        <button class="btn btn--gradient" onclick="createEvent()">Submit for Approval</button>
+        <p style="font-size:0.8rem; color:var(--on-surface-variant)">Events are held in 'pending' status for admin verification.</p>
+      </div>
+    </div>
+
+    <!-- My Hosted Events Section -->
+    <div id="my-hosted-events-section" style="margin-bottom: 2rem; display:none;">
+      <h3 style="margin-bottom:1rem">Your Hosted Events (Organizer Panel)</h3>
+      <div id="my-events-list" class="dash-grid"></div>
+    </div>
+
+    <h3 style="margin-bottom:1rem">Upcoming Events</h3>
+    <div id="events-list" class="dash-grid"></div>
+  </div>
+
+  <!-- REFERRALS TAB -->
+  <div id="tab-referrals" class="section-block" style="display:none">
+    <h2>Referral & Rewards</h2>
+    <div class="dash-card glass-panel">
+      <div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">share</span></div><div class="dash-card__title">Your Referral Link</div></div>
+      <div class="ref-code"><input id="ref-code-input" readonly/><button class="btn btn--glass" onclick="copyRef()">Copy</button></div>
+    </div>
+    <div style="margin-top:1.5rem" id="milestones-container"></div>
+  </div>
+
+  <!-- COMPANIES TAB -->
+  <div id="tab-companies" class="section-block" style="display:none">
+    
+    <!-- Prominent Add Company Call-To-Action -->
+    <div class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(96,165,250,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(96,165,250,0.3); text-align: center; padding: 2rem;">
+      <div style="font-size: 3rem; color: #60a5fa; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3rem;">business_center</span></div>
+      <h2 style="margin-bottom: 0.5rem;">List Your Company on SyncUp</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 1.5rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Create a verified business profile to unlock the B2B Service Exchange, post experienced jobs, and connect directly with investors. All new companies undergo manual document review.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2rem;" onclick="document.getElementById('create-company-form').style.display='block'; this.parentElement.style.display='none';">+ Register New Company</button>
+    </div>
+    
+    <!-- Create Company Form -->
+    <div id="create-company-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #60a5fa;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Register a New Company</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('create-company-form').style.display='none'; document.getElementById('tab-companies').firstElementChild.style.display='block';">Cancel</button>
+      </div>
+
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Company Name</label>
+        <input class="form-input" id="new-company-name" placeholder="e.g. Acme Corp" />
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Industry</label>
+        <input class="form-input" id="new-company-industry" placeholder="e.g. Technology" />
+      </div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Company Website</label>
+        <input class="form-input" type="url" id="new-company-website" placeholder="https://example.com" />
+      </div>
+      <div class="form-group" style="margin-bottom:1.5rem">
+        <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Description</label>
+        <textarea class="post-input" id="new-company-desc" placeholder="What does your company do?" style="min-height:80px"></textarea>
+      </div>
+
+      <div style="margin: 2rem 0; padding: 1.5rem; background: rgba(96,165,250,0.05); border-radius: 12px; border: 1px dashed rgba(96,165,250,0.3);">
+        <h4 style="margin-bottom: 1rem; color: #60a5fa;"><span class="material-symbols-outlined" style="vertical-align: middle; margin-right: 8px;">verified_user</span>Ownership Verification Requirement</h4>
+        <p style="font-size: 0.85rem; color: var(--on-surface-variant); margin-bottom: 1rem;">
+          To prevent impersonation and ensure platform trust, all companies are hidden from the public feed until the claimed owner is verified by our Admin team.
+        </p>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Official Domain Email (Required)</label>
+          <input class="form-input" type="email" id="new-company-domain-email" placeholder="you@companydomain.com" />
+        </div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label style="display:block;font-size:.8rem;color:var(--on-surface-variant);margin-bottom:.4rem;font-weight:600">Business Registry / Incorporation Document (Required)</label>
+          <input type="file" class="form-input" id="new-company-doc" style="padding:0.5rem" />
+        </div>
+      </div>
+
+      <div style="display:flex;gap:1rem;align-items:center;">
+        <button class="btn btn--gradient" id="submit-company-btn" onclick="createCompany()">Submit for Review</button>
+        <span id="create-company-result" style="font-size:0.9rem; font-weight:500;"></span>
+      </div>
+    </div>
+
+    <div id="companies-list" class="dash-grid"></div>
+  </div>
+
+  <!-- PROFILE TAB -->
+  <div id="tab-profile" class="section-block" style="display:none">
+    
+    <!-- Profile Header / Identity Status -->
+    <div class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(224,176,255,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(224,176,255,0.3); padding: 2.5rem; display: flex; align-items: center; gap: 2rem;">
+      <div style="width: 100px; height: 100px; background: var(--surface-highest); border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">account_circle</span>
+      </div>
+      <div style="flex: 1;">
+        <h1 id="welcome-name" style="margin-bottom: 0.5rem; font-size: 2.2rem;" class="gradient-text">Welcome</h1>
+        <div style="display: flex; gap: 1rem; align-items: center;">
+          <span id="verify-badge" class="dash-badge">Checking status...</span>
+          <span id="trust-badge" class="dash-badge verified" style="background: rgba(0,210,133,0.1); color: #00d285;">Trust: --</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="dash-grid" style="grid-template-columns: 2fr 1.2fr; gap: 2rem; align-items: start;">
+      
+      <!-- Edit Profile Section -->
+      <div class="dash-card glass-panel" style="border-top: 4px solid var(--primary);">
+        <h3 style="margin-bottom: 1.5rem;">Professional Information</h3>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Professional Headline</label>
+          <input class="form-input" id="profile-headline" placeholder="e.g. Senior Engineer at Google"/>
+        </div>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Bio / Career Summary</label>
+          <textarea class="post-input" id="profile-bio" placeholder="Tell professionals about yourself..." style="min-height:120px"></textarea>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem">
+          <label class="form-label">Skills (comma-separated)</label>
+          <input class="form-input" id="profile-skills" placeholder="JavaScript, Leadership, Product"/>
+        </div>
+        <button class="btn btn--gradient btn--lg" onclick="updateProfile()">Save Changes</button>
+      </div>
+
+      <!-- Identity Verification Section -->
+      <div class="dash-card glass-panel" style="border-top: 4px solid #4ade80;">
+        <h3 style="margin-bottom: 1rem; color: #4ade80;">Identity Verification</h3>
+        <p style="font-size:0.85rem; color:var(--on-surface-variant); margin-bottom:1.5rem">
+          Verify your professional name to unlock high-trust features. Impersonation detection is active.
+        </p>
+        <div class="form-group" style="margin-bottom:1rem">
+          <label class="form-label">Claimed Name</label>
+          <div style="display:flex; flex-direction: column; gap:0.5rem;">
+            <input class="form-input" id="identity-claim-name" placeholder="e.g. Elon Musk" oninput="debouncedRiskCheck()"/>
+            <span id="risk-badge" style="display:none; padding:.3rem .6rem; border-radius:.5rem; font-size:.7rem; font-weight:700; align-self: flex-start;"></span>
+          </div>
+        </div>
+        <div class="form-group" style="margin-bottom:1.5rem" id="identity-doc-group">
+          <label class="form-label">Supporting Document (PDF/Image)</label>
+          <input type="file" class="form-input" id="identity-claim-doc" style="padding:0.5rem"/>
+        </div>
+        <button class="btn btn--glass btn--full" onclick="submitIdentityClaim()" style="color: #4ade80; border-color: rgba(74,222,128,0.3);">Submit Verification</button>
+        <div id="identity-claim-result" style="margin-top:1rem;font-size:0.8rem;font-weight:600"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- B2B TAB -->
+  <div id="tab-b2b" class="section-block" style="display:none">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem">
+      <h2>B2B Service Exchange</h2>
+      <button class="btn btn--glass" onclick="alert('In a full app, this opens a modal to post a new B2B project.')">+ Post Project</button>
+    </div>
+    <div id="b2b-list" class="dash-grid"></div>
+  </div>
+
+  <!-- INVESTMENTS TAB -->
+  <div id="tab-opportunities" class="section-block" style="display:none">
+    
+    <!-- Prominent Investment Call-To-Action -->
+    <div id="list-investment-cta" class="dash-card glass-panel" style="margin-bottom:2rem; background: linear-gradient(145deg, rgba(251,191,36,0.1) 0%, rgba(0,0,0,0.4) 100%); border-color: rgba(251,191,36,0.3); text-align: center; padding: 2.5rem;">
+      <div style="font-size: 3.5rem; color: #fbbf24; margin-bottom: 1rem;"><span class="material-symbols-outlined" style="font-size: 3.5rem;">monetization_on</span></div>
+      <h2 style="margin-bottom: 0.5rem;">Secure Funding for Your Vision</h2>
+      <p style="color: var(--on-surface-variant); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto;">
+        Access direct owner-to-investor capital. Skip the brokers and middlemen. Verified founders get direct exposure to our network of accredited investors.
+      </p>
+      <button class="btn btn--gradient" style="font-size: 1.1rem; padding: 0.8rem 2.5rem;" onclick="showInvestmentListingForm(); document.getElementById('list-investment-cta').style.display='none';">+ List for Investment</button>
+    </div>
+
+    <!-- List for Investment Form -->
+    <div id="list-investment-form" class="dash-card glass-panel" style="display:none;margin-bottom:2rem; border-top: 4px solid #fbbf24;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+        <h3>Raise Capital for Your Company</h3>
+        <button class="btn btn--glass" onclick="document.getElementById('list-investment-form').style.display='none'; document.getElementById('list-investment-cta').style.display='block';">Cancel</button>
+      </div>
+      <div class="dash-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+        <div class="form-group">
+          <label class="form-label">Select Company</label>
+          <select class="form-input" id="invest-company-select"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Seeking Amount (₹)</label>
+          <input class="form-input" type="number" id="invest-amount" placeholder="e.g. 5000000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Equity Offered (%)</label>
+          <input class="form-input" type="number" id="invest-equity" placeholder="e.g. 10" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Sector</label>
+          <input class="form-input" id="invest-sector" placeholder="e.g. FinTech" />
+        </div>
+        <div class="form-group" style="grid-column: span 2;">
+          <label class="form-label">Investment Description</label>
+          <textarea class="post-input" id="invest-desc" placeholder="Briefly describe your growth plan..." style="min-height:80px"></textarea>
+        </div>
+      </div>
+      <div style="margin-top:1.5rem; display:flex; gap:1rem; align-items:center;">
+        <button class="btn btn--gradient" onclick="postInvestment()">Post Opportunity</button>
+        <p style="font-size:0.8rem; color:var(--on-surface-variant)">Only verified owners can list. High-value deals undergo escalation review.</p>
+      </div>
+    </div>
+
+    <!-- Manage My Investments Section -->
+    <div id="my-investments-section" style="margin-bottom: 2rem; display:none;">
+      <h3 style="margin-bottom:1rem">Your Active Fundraises</h3>
+      <div id="my-investments-list" class="dash-grid"></div>
+    </div>
+
+    <h3 style="margin-bottom:1rem">Explore Opportunities</h3>
+    <div id="investments-list" class="dash-grid"></div>
+  </div>
+
+  <!-- Trust Lineage Modal (Simplified) -->
+  <div id="trust-modal" class="glass-panel" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); z-index:1000; width:90%; max-width:500px; padding:2rem; box-shadow: 0 0 100px rgba(0,0,0,0.8);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+      <h3 id="trust-modal-title">Investment Trust Lineage</h3>
+      <button class="btn btn--glass" onclick="document.getElementById('trust-modal').style.display='none'">Close</button>
+    </div>
+    <div id="trust-modal-content"></div>
+  </div>
+
+  <!-- AI TIPS TAB -->
+  <div id="tab-ai" class="section-block" style="display:none">
+    <h2>✨ AI Assistant</h2>
+    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Personalized insights to accelerate your professional growth.</p>
+    <div class="dash-grid" style="grid-template-columns: 1fr">
+      <div class="dash-card glass-panel" style="background:linear-gradient(135deg,rgba(110,60,255,0.1),rgba(40,20,100,0.2));border:1px solid rgba(110,60,255,0.3)">
+        <div class="dash-card__header"><div class="dash-card__icon" style="background:var(--primary);color:#fff"><span class="material-symbols-outlined">lightbulb</span></div><div class="dash-card__title">Profile Optimization</div></div>
+        <div id="ai-profile-tips" class="dash-card__body">Loading AI insights...</div>
+      </div>
+      <div class="dash-card glass-panel" style="background:linear-gradient(135deg,rgba(0,255,150,0.05),rgba(0,100,50,0.1));border:1px solid rgba(0,255,150,0.2)">
+        <div class="dash-card__header"><div class="dash-card__icon" style="background:#00d285;color:#fff"><span class="material-symbols-outlined">trending_up</span></div><div class="dash-card__title">Campaign Strategy</div></div>
+        <div id="ai-campaign-tips" class="dash-card__body">Loading AI insights...</div>
+      </div>
+    </div>
+  </div>
+  <!-- ADMIN TAB -->
+  <div id="tab-admin" class="section-block" style="display:none">
+    <h2>Admin Center</h2>
+    <p style="color:var(--on-surface-variant);margin-bottom:1.5rem">Review and manage pending identity and company claims.</p>
+    
+    <div class="dash-card glass-panel" style="margin-bottom: 2rem;">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#fbbf24;color:#000"><span class="material-symbols-outlined">pending_actions</span></div>
+        <div class="dash-card__title">Pending Identity Claims</div>
+      </div>
+      <div id="admin-claims-list" class="dash-card__body">
+        Loading pending claims...
+      </div>
+    </div>
+
+    <div class="dash-card glass-panel">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#60a5fa;color:#000"><span class="material-symbols-outlined">domain_verification</span></div>
+        <div class="dash-card__title">Pending Company Ownership Claims</div>
+      </div>
+      <div id="admin-company-claims-list" class="dash-card__body">
+        Loading pending company claims...
+      </div>
+    </div>
+    <div class="dash-card glass-panel" style="margin-top: 2rem;">
+      <div class="dash-card__header">
+        <div class="dash-card__icon" style="background:#4ade80;color:#000"><span class="material-symbols-outlined">event_available</span></div>
+        <div class="dash-card__title">Pending Event Approvals</div>
+      </div>
+      <div id="admin-events-list" class="dash-card__body">
+        Loading pending events...
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = window.location.origin + '/api';
+const token = localStorage.getItem('syncup_token');
+if (!token) window.location.href = '/login';
+const headers = { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token };
+let currentUser = JSON.parse(localStorage.getItem('syncup_user') || '{}');
+
+// Init
+(async () => {
+  try {
+    const res = await fetch(API + '/auth/me', { headers });
+    const data = await res.json();
+    if (!res.ok) { logout(); return; }
+    currentUser = data.user;
+    localStorage.setItem('syncup_user', JSON.stringify(currentUser));
+    document.getElementById('welcome-name').textContent = `Welcome, ${currentUser.name}`;
+    document.getElementById('verify-badge').textContent = currentUser.isVerified ? '✓ Verified' : '⚠ Unverified';
+    document.getElementById('verify-badge').className = `dash-badge ${currentUser.isVerified ? 'verified' : 'unverified'}`;
+    document.getElementById('trust-badge').textContent = `Trust: ${currentUser.trustScore}`;
+    if (currentUser.headline) document.getElementById('profile-headline').value = currentUser.headline;
+    if (currentUser.bio) document.getElementById('profile-bio').value = currentUser.bio;
+    if (currentUser.skills) document.getElementById('profile-skills').value = currentUser.skills.join(', ');
+    
+    document.getElementById('identity-claim-name').value = currentUser.name;
+    debouncedRiskCheck(); // trigger the risk check immediately
+
+    if (currentUser.role === 'admin') {
+      document.getElementById('admin-tab-btn').style.display = 'inline-block';
+    }
+    
+    if (!currentUser.isVerified) {
+      // Platform Lockout for Unverified Users
+      const lockoutMsg = document.createElement('div');
+      lockoutMsg.style = "background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: #ff6b6b; padding: 1rem; border-radius: 12px; margin-bottom: 1.5rem;";
+      lockoutMsg.innerHTML = "<strong>Platform Access Restricted:</strong> You must upload your supporting documents below and await Admin approval before you can access the SyncUp platform.";
+      document.getElementById('tab-profile').prepend(lockoutMsg);
+      
+      // Hide other tabs
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.textContent !== 'Profile' && btn.textContent !== 'Admin' && btn.id !== 'logout-btn') {
+          btn.style.display = 'none';
+        }
+      });
+      switchTab('profile'); // Force to profile tab
+    } else {
+      loadFeed(); loadReferrals();
+    }
+  } catch(e) { console.error(e); }
+})();
+
+function switchTab(tab) {
+  document.querySelectorAll('.section-block').forEach(s => s.style.display = 'none');
+  document.getElementById('tab-' + tab).style.display = 'block';
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  if (event && event.target && event.target.classList) {
+    event.target.classList.add('active');
+  }
+  if (tab === 'jobs') loadJobs();
+  if (tab === 'events') { loadEvents(); loadMyHostedEvents(); }
+  if (tab === 'companies') loadCompanies();
+  if (tab === 'b2b') loadB2B();
+  if (tab === 'opportunities') { loadInvestments(); loadMyOpportunities(); }
+  if (tab === 'ai') loadAI();
+  if (tab === 'admin') { loadAdminClaims(); loadAdminCompanyClaims(); loadAdminPendingEvents(); }
+}
+
+async function loadFeed() {
+  const res = await fetch(API + '/posts', { headers });
+  const { posts } = await res.json();
+  document.getElementById('feed-list').innerHTML = posts.length === 0
+    ? '<div class="glass-panel" style="padding:2rem;text-align:center;border-radius:1rem;color:var(--on-surface-variant)">No posts yet. Be the first to share!</div>'
+    : posts.map(p => `<div class="feed-post glass-panel">
+      <div class="feed-post__author"><div class="feed-post__avatar">${(p.author?.name||'?')[0]}</div><div><div class="feed-post__name">${p.author?.name||'Unknown'} ${p.author?.isVerified?'<span style="color:#4ade80">✓</span>':''}</div><div class="feed-post__headline">${p.author?.headline||''}</div></div></div>
+      <div class="feed-post__content">${p.content}</div>
+      <div class="feed-post__actions">
+        <button class="feed-post__action" onclick="likePost('${p._id}')"><span class="material-symbols-outlined" style="font-size:1rem">favorite</span> ${p.likes?.length||0}</button>
+        <button class="feed-post__action"><span class="material-symbols-outlined" style="font-size:1rem">comment</span> ${p.comments?.length||0}</button>
+      </div></div>`).join('');
+}
+
+async function createPost() {
+  const content = document.getElementById('post-content').value.trim();
+  if (!content) return;
+  await fetch(API + '/posts', { method: 'POST', headers, body: JSON.stringify({ content }) });
+  document.getElementById('post-content').value = '';
+  loadFeed();
+}
+
+async function likePost(id) { await fetch(API + '/posts/' + id + '/like', { method: 'POST', headers }); loadFeed(); }
+
+async function loadJobs() {
+  const res = await fetch(API + '/jobs', { headers });
+  const { jobs } = await res.json();
+  document.getElementById('jobs-list').innerHTML = jobs.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No jobs posted yet.</p></div>'
+    : jobs.map(j => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">work</span></div><div class="dash-card__title">${j.title}</div></div><div class="dash-card__body"><p>${j.company?.name||''} · ${j.experienceMin}+ yrs · ${j.type||'full-time'}</p><p style="margin-top:.5rem">${(j.description||'').slice(0,120)}...</p><button class="btn btn--glass" style="margin-top:1rem" onclick="applyJob('${j._id}')">Apply</button></div></div>`).join('');
+}
+
+async function applyJob(id) {
+  const res = await fetch(API + '/jobs/' + id + '/apply', { method: 'POST', headers, body: JSON.stringify({}) });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function loadEvents() {
+  const res = await fetch(API + '/events', { headers });
+  const { events } = await res.json();
+  document.getElementById('events-list').innerHTML = events.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No upcoming verified events yet.</p></div>'
+    : events.map(e => `
+      <div class="dash-card glass-panel">
+        <div class="dash-card__header">
+          <div class="dash-card__icon"><span class="material-symbols-outlined">event</span></div>
+          <div class="dash-card__title">${e.title} ${e.isVerified?'<span style="color:#4ade80">✓</span>':''}</div>
+        </div>
+        <div class="dash-card__body">
+          <p>${e.type.toUpperCase()} · ${new Date(e.startDate).toLocaleDateString()}</p>
+          <div style="margin: 0.8rem 0; padding: 0.5rem; background: rgba(96,165,250,0.1); border-radius: 8px; font-size: 0.75rem; color: #60a5fa;">
+            <span class="material-symbols-outlined" style="font-size: 0.9rem; vertical-align: middle;">shield_with_heart</span> 
+            SyncEscrow: Payout held until event completion
+          </div>
+          <p style="margin-top:.5rem">${(e.description||'').slice(0,100)}...</p>
+          <p style="margin-top:.5rem;color:var(--primary);font-weight:700">₹${e.ticketPrice||'Free'} · Trust Score: ${e.trustScore}</p>
+          <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+            <button class="btn btn--gradient" style="flex:1" onclick="registerEvent('${e._id}')">Register</button>
+            <button class="btn btn--glass" title="Report Fraud" onclick="reportFraud('${e._id}')"><span class="material-symbols-outlined" style="font-size:1.1rem">flag</span></button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+
+async function createEvent() {
+  const title = document.getElementById('event-title').value.trim();
+  const type = document.getElementById('event-type').value;
+  const startDate = document.getElementById('event-date').value;
+  const ticketPrice = document.getElementById('event-price').value;
+  const description = document.getElementById('event-desc').value.trim();
+  const cancellationPolicy = document.getElementById('event-policy').value;
+
+  if (!title || !startDate) return alert('Title and Date are required');
+
+  const res = await fetch(API + '/events', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ title, type, startDate, ticketPrice, description, cancellationPolicy })
+  });
+
+  if (res.ok) {
+    alert('Event submitted for admin review!');
+    document.getElementById('host-event-form').style.display = 'none';
+    loadMyHostedEvents();
+  } else {
+    const data = await res.json();
+    alert('Error: ' + data.error);
+  }
+}
+
+async function loadMyHostedEvents() {
+  const res = await fetch(API + '/events/my-hosted', { headers });
+  const { events } = await res.json();
+  if (events && events.length > 0) {
+    document.getElementById('my-hosted-events-section').style.display = 'block';
+    document.getElementById('my-events-list').innerHTML = events.map(e => `
+      <div class="dash-card glass-panel" style="border-left: 4px solid ${e.status === 'live' ? '#4ade80' : '#fbbf24'}">
+        <div class="dash-card__header">
+          <div class="dash-card__title">${e.title}</div>
+          <span class="dash-badge ${e.status}">${e.status}</span>
+        </div>
+        <div class="dash-card__body">
+          <p>Escrow Balance: <b>₹${e.escrowBalance || 0}</b></p>
+          <p style="font-size:0.8rem; margin-top:0.4rem">Policy: ${e.cancellationPolicy}</p>
+          <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+            ${e.status === 'approved' || e.status === 'live' ? `
+              <button class="btn btn--gradient" style="font-size:0.8rem" onclick="completeEvent('${e._id}')">Complete & Release</button>
+              <button class="btn btn--glass" style="font-size:0.8rem; color:#ef4444" onclick="cancelEvent('${e._id}')">Cancel</button>
+            ` : ''}
+          </div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('my-hosted-events-section').style.display = 'none';
+  }
+}
+
+async function registerEvent(id) {
+  const res = await fetch(API + '/events/' + id + '/register', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadEvents();
+}
+
+async function reportFraud(id) {
+  const reason = prompt('Reason for fraud report:');
+  if (!reason) return;
+  const res = await fetch(API + '/events/' + id + '/report', { method: 'POST', headers, body: JSON.stringify({ reason }) });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadEvents();
+}
+
+async function completeEvent(id) {
+  if (!confirm('Are you sure the event is finished? This will release the escrow funds to your account.')) return;
+  const res = await fetch(API + '/events/' + id + '/complete', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadMyHostedEvents();
+}
+
+async function cancelEvent(id) {
+  if (!confirm('Cancel event? This will automatically trigger refunds based on your policy and impact your trust score.')) return;
+  const res = await fetch(API + '/events/' + id + '/cancel', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+  loadMyHostedEvents();
+}
+
+async function loadAdminPendingEvents() {
+  const res = await fetch(API + '/admin/pending-events', { headers });
+  const { pendingEvents } = await res.json();
+  document.getElementById('admin-events-list').innerHTML = (pendingEvents||[]).length === 0
+    ? '<p style="color:var(--on-surface-variant)">No pending events for review.</p>'
+    : pendingEvents.map(e => `
+      <div class="dash-card glass-panel" style="margin-bottom:1rem">
+        <div style="display:flex; justify-content:space-between;">
+          <div>
+            <h4 style="margin-bottom:0.4rem">${e.title} (${e.type})</h4>
+            <p style="font-size:0.85rem">Organizer: <b>${e.organizer?.name}</b> (Trust: ${e.organizer?.trustScore})</p>
+            <p style="font-size:0.85rem">Date: ${new Date(e.startDate).toLocaleDateString()} | Price: ₹${e.ticketPrice}</p>
+            <p style="margin-top:0.5rem; font-size:0.85rem">${e.description}</p>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.5rem;">
+            <button class="btn btn--gradient" style="padding:0.4rem 1rem" onclick="approveEvent('${e._id}')">Approve</button>
+            <button class="btn btn--glass" style="padding:0.4rem 1rem; color:#ef4444" onclick="rejectEvent('${e._id}')">Reject</button>
+          </div>
+        </div>
+      </div>`).join('');
+}
+
+async function approveEvent(id) {
+  const res = await fetch(API + '/admin/events/' + id + '/approve', { method: 'POST', headers });
+  if (res.ok) { alert('Event approved.'); loadAdminPendingEvents(); }
+}
+
+async function rejectEvent(id) {
+  const reason = prompt('Reason for rejection:');
+  const res = await fetch(API + '/admin/events/' + id + '/reject', { method: 'POST', headers, body: JSON.stringify({ reason }) });
+  if (res.ok) { alert('Event rejected.'); loadAdminPendingEvents(); }
+}
+
+async function registerEvent(id) {
+  const res = await fetch(API + '/events/' + id + '/register', { method: 'POST', headers });
+  const data = await res.json();
+  alert(data.message || data.error);
+}
+
+async function loadCompanies() {
+  const res = await fetch(API + '/companies', { headers });
+  const { companies } = await res.json();
+  document.getElementById('companies-list').innerHTML = companies.length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No companies yet.</p></div>'
+    : companies.map(c => {
+        let actionBtn = '';
+        if (c.owner?._id === currentUser.id) {
+          if (c.isVerified) {
+            actionBtn = `<span style="display:inline-block;margin-top:1rem;font-size:0.8rem;color:#4ade80">✓ Verified Owner</span>`;
+          } else {
+            actionBtn = `<span style="display:inline-block;margin-top:1rem;font-size:0.8rem;color:#fbbf24">⚠ Verification Pending Review</span>`;
+          }
+        }
+        return `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">business</span></div><div class="dash-card__title">${c.name} ${c.isVerified?'<span style="color:#4ade80">✓</span>':''}</div></div><div class="dash-card__body"><p>${c.industry||''} · ${c.size||''}</p><p style="margin-top:.5rem">${(c.description||'').slice(0,120)}...</p>${actionBtn}</div></div>`;
+      }).join('');
+}
+
+async function createCompany() {
+  const name = document.getElementById('new-company-name').value.trim();
+  const industry = document.getElementById('new-company-industry').value.trim();
+  const website = document.getElementById('new-company-website').value.trim();
+  const description = document.getElementById('new-company-desc').value.trim();
+  const domainEmail = document.getElementById('new-company-domain-email').value.trim();
+  const fileInput = document.getElementById('new-company-doc');
+  const resultSpan = document.getElementById('create-company-result');
+
+  if (!name || !industry || !domainEmail) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'Name, Industry, and Domain Email are required';
+    return;
+  }
+
+  if (fileInput.files.length === 0) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'You must upload a supporting business document.';
+    return;
+  }
+
+  const documents = [fileInput.files[0].name];
+  
+  const btn = document.getElementById('submit-company-btn');
+  const originalText = btn.textContent;
+  btn.textContent = 'Submitting...';
+  btn.disabled = true;
+  resultSpan.textContent = '';
+
+  try {
+    const res = await fetch(API + '/companies', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ name, industry, website, description, size: '1-10', domainEmail, documents })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      resultSpan.style.color = '#4ade80';
+      resultSpan.textContent = 'Company submitted for manual admin review!';
+      
+      setTimeout(() => {
+        document.getElementById('new-company-name').value = '';
+        document.getElementById('new-company-industry').value = '';
+        document.getElementById('new-company-website').value = '';
+        document.getElementById('new-company-desc').value = '';
+        document.getElementById('new-company-domain-email').value = '';
+        document.getElementById('new-company-doc').value = '';
+        document.getElementById('create-company-form').style.display = 'none';
+        document.getElementById('tab-companies').firstElementChild.style.display = 'block';
+        btn.textContent = originalText;
+        btn.disabled = false;
+        resultSpan.textContent = '';
+        loadCompanies();
+      }, 2500);
+    } else {
+      resultSpan.style.color = '#ef4444';
+      resultSpan.textContent = 'Error: ' + data.error;
+      btn.textContent = originalText;
+      btn.disabled = false;
+    }
+  } catch(e) {
+    resultSpan.style.color = '#ef4444';
+    resultSpan.textContent = 'Connection error';
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }
+}
+
+async function loadReferrals() {
+  try {
+    const [codeRes, mRes] = await Promise.all([
+      fetch(API + '/referrals/code', { headers }),
+      fetch(API + '/referrals/milestones', { headers })
+    ]);
+    const codeData = await codeRes.json();
+    const mData = await mRes.json();
+    document.getElementById('ref-code-input').value = window.location.origin + '/login?ref=' + codeData.referralCode;
+    const mc = document.getElementById('milestones-container');
+    mc.innerHTML = (mData.milestones || []).map(m => {
+      const pct = Math.min((mData.verifiedReferrals / m.target) * 100, 100);
+      return `<div class="milestone-row"><span class="milestone-row__label">${m.target}</span><div class="milestone-row__progress"><div class="milestone-row__fill" style="width:${pct}%"></div></div><span class="milestone-row__reward">${m.reward}</span></div>`;
+    }).join('');
+  } catch(e) {}
+}
+
+function copyRef() {
+  const inp = document.getElementById('ref-code-input');
+  inp.select(); navigator.clipboard.writeText(inp.value);
+  alert('Referral link copied!');
+}
+
+async function updateProfile() {
+  const res = await fetch(API + '/users/profile', {
+    method: 'PUT', headers,
+    body: JSON.stringify({
+      headline: document.getElementById('profile-headline').value,
+      bio: document.getElementById('profile-bio').value,
+      skills: document.getElementById('profile-skills').value.split(',').map(s => s.trim()).filter(Boolean)
+    })
+  });
+  if (res.ok) alert('Profile updated!');
+}
+
+let riskCheckTimeout;
+async function debouncedRiskCheck() {
+  clearTimeout(riskCheckTimeout);
+  const name = document.getElementById('identity-claim-name').value.trim();
+  const badge = document.getElementById('risk-badge');
+  const docGroup = document.getElementById('identity-doc-group');
+  
+  if (!name) {
+    badge.style.display = 'none';
+    docGroup.style.display = 'none';
+    return;
+  }
+  
+  riskCheckTimeout = setTimeout(async () => {
+    try {
+      const res = await fetch(API + '/verify/check-name-risk?name=' + encodeURIComponent(name), { headers });
+      const data = await res.json();
+      
+      badge.style.display = 'inline-block';
+      if (data.riskScore > 70) {
+        badge.textContent = `High Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(239, 68, 68, 0.1)';
+        badge.style.color = '#ef4444';
+      } else if (data.riskScore > 40) {
+        badge.textContent = `Medium Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(251, 191, 36, 0.1)';
+        badge.style.color = '#fbbf24';
+      } else {
+        badge.textContent = `Low Risk (${data.riskScore})`;
+        badge.style.background = 'rgba(74, 222, 128, 0.1)';
+        badge.style.color = '#4ade80';
+      }
+      // Document upload is now mandatory for ALL claims, regardless of risk
+      docGroup.style.display = 'block';
+    } catch(e) {}
+  }, 500);
+}
+
+async function submitIdentityClaim() {
+  const claimedName = document.getElementById('identity-claim-name').value.trim();
+  const fileInput = document.getElementById('identity-claim-doc');
+  const resultDiv = document.getElementById('identity-claim-result');
+  
+  if (!claimedName) return alert('Please enter a name to claim');
+  
+  resultDiv.innerHTML = '<span style="color:var(--primary)">Processing claim...</span>';
+  
+  // In a real app, we would upload the file to S3/Cloud Storage and get a URL.
+  // Here we simulate the document upload.
+  const documents = fileInput.files.length > 0 ? [fileInput.files[0].name] : [];
+  
+  try {
+    const res = await fetch(API + '/verify/identity-claim', {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ claimedName, documents })
+    });
+    
+    const data = await res.json();
+    
+    if (res.ok) {
+      if (data.status === 'pending') {
+        resultDiv.innerHTML = `<span style="color:#fbbf24">⚠️ Manual Review Required (Risk Score: ${data.riskScore}/100).</span><br/>${data.message}`;
+      } else {
+        resultDiv.innerHTML = `<span style="color:#4ade80">✓ Claim Approved (Risk Score: ${data.riskScore}/100).</span><br/>${data.message}`;
+        currentUser.name = claimedName;
+        document.getElementById('welcome-name').textContent = `Welcome, ${currentUser.name}`;
+      }
+    } else {
+      resultDiv.innerHTML = `<span style="color:#ef4444">Error: ${data.error}</span>`;
+    }
+  } catch(e) {
+    resultDiv.innerHTML = `<span style="color:#ef4444">Connection error.</span>`;
+  }
+}
+
+async function loadAdminClaims() {
+  try {
+    const res = await fetch(API + '/admin/pending-claims', { headers });
+    const data = await res.json();
+    
+    const list = document.getElementById('admin-claims-list');
+    if (!data.pendingClaims || data.pendingClaims.length === 0) {
+      list.innerHTML = '<p>No pending claims to review.</p>';
+      return;
+    }
+    
+    list.innerHTML = data.pendingClaims.map(u => `
+      <div style="padding:1rem; border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; margin-bottom:1rem; background:rgba(0,0,0,0.2)">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start">
+          <div>
+            <h4 style="margin-bottom:0.25rem">${u.name}</h4>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Email: ${u.email}</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Trust Score: ${u.trustScore}</p>
+            <div style="margin-top:0.5rem">
+              <p style="font-size:0.85rem; font-weight:600">Uploaded Documents:</p>
+              ${u.identityClaim?.documents?.map(d => `<span style="display:inline-block; padding:0.2rem 0.5rem; background:rgba(255,255,255,0.1); border-radius:0.25rem; font-size:0.75rem; margin-top:0.25rem; margin-right:0.5rem">${d}</span>`).join('') || '<span style="font-size:0.8rem;color:#ef4444">None provided</span>'}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="color:#4ade80; border-color:rgba(74,222,128,0.3)" onclick="approveClaim('${u._id}')">Approve</button>
+            <button class="btn btn--glass" style="color:#ef4444; border-color:rgba(239,68,68,0.3)" onclick="rejectClaim('${u._id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('admin-claims-list').innerHTML = '<p style="color:#ef4444">Failed to load claims.</p>';
+  }
+}
+
+async function approveClaim(userId) {
+  try {
+    const res = await fetch(API + '/admin/claims/' + userId + '/approve', { method: 'POST', headers });
+    if (res.ok) {
+      alert('Claim approved successfully.');
+      loadAdminClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function rejectClaim(userId) {
+  const reason = prompt('Reason for rejection:');
+  if (reason === null) return;
+  try {
+    const res = await fetch(API + '/admin/claims/' + userId + '/reject', { 
+      method: 'POST', 
+      headers,
+      body: JSON.stringify({ reason: reason || 'Rejected by admin' })
+    });
+    if (res.ok) {
+      alert('Claim rejected.');
+      loadAdminClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function loadAdminCompanyClaims() {
+  try {
+    const res = await fetch(API + '/admin/pending-company-claims', { headers });
+    const data = await res.json();
+    
+    const list = document.getElementById('admin-company-claims-list');
+    if (!data.pendingCompanyClaims || data.pendingCompanyClaims.length === 0) {
+      list.innerHTML = '<p>No pending company claims to review.</p>';
+      return;
+    }
+    
+    list.innerHTML = data.pendingCompanyClaims.map(c => `
+      <div style="padding:1rem; border:1px solid rgba(255,255,255,0.1); border-radius:0.75rem; margin-bottom:1rem; background:rgba(0,0,0,0.2)">
+        <div style="display:flex; justify-content:space-between; align-items:flex-start">
+          <div>
+            <h4 style="margin-bottom:0.25rem">${c.name}</h4>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Website: ${c.website || 'N/A'}</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Claimed By: ${c.owner?.name} (${c.owner?.email})</p>
+            <p style="font-size:0.8rem; color:var(--on-surface-variant)">Domain Email: ${c.ownershipClaim?.domainEmail}</p>
+            <div style="margin-top:0.5rem">
+              <p style="font-size:0.85rem; font-weight:600">Uploaded Documents:</p>
+              ${c.ownershipClaim?.documents?.map(d => `<span style="display:inline-block; padding:0.2rem 0.5rem; background:rgba(255,255,255,0.1); border-radius:0.25rem; font-size:0.75rem; margin-top:0.25rem; margin-right:0.5rem">${d}</span>`).join('') || '<span style="font-size:0.8rem;color:#ef4444">None provided</span>'}
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="color:#4ade80; border-color:rgba(74,222,128,0.3)" onclick="approveCompanyClaim('${c._id}')">Approve</button>
+            <button class="btn btn--glass" style="color:#ef4444; border-color:rgba(239,68,68,0.3)" onclick="rejectCompanyClaim('${c._id}')">Reject</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    document.getElementById('admin-company-claims-list').innerHTML = '<p style="color:#ef4444">Failed to load company claims.</p>';
+  }
+}
+
+async function approveCompanyClaim(companyId) {
+  try {
+    const res = await fetch(API + '/admin/companies/' + companyId + '/approve', { method: 'POST', headers });
+    if (res.ok) {
+      alert('Company claim approved successfully.');
+      loadAdminCompanyClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function rejectCompanyClaim(companyId) {
+  const reason = prompt('Reason for rejection:');
+  if (reason === null) return;
+  try {
+    const res = await fetch(API + '/admin/companies/' + companyId + '/reject', { 
+      method: 'POST', 
+      headers,
+      body: JSON.stringify({ reason: reason || 'Rejected by admin' })
+    });
+    if (res.ok) {
+      alert('Company claim rejected.');
+      loadAdminCompanyClaims();
+    } else {
+      const data = await res.json();
+      alert('Error: ' + data.error);
+    }
+  } catch(e) { alert('Connection error'); }
+}
+
+async function loadB2B() {
+  const res = await fetch(API + '/b2b/projects', { headers });
+  const { projects } = await res.json();
+  document.getElementById('b2b-list').innerHTML = (projects||[]).length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No active B2B projects.</p></div>'
+    : projects.map(p => `<div class="dash-card glass-panel"><div class="dash-card__header"><div class="dash-card__icon"><span class="material-symbols-outlined">handshake</span></div><div class="dash-card__title">${p.title}</div></div><div class="dash-card__body"><p>Budget: <b>₹${p.budget.toLocaleString()}</b></p><p style="margin-top:.5rem">${(p.description||'').slice(0,120)}...</p><button class="btn btn--glass" style="margin-top:1rem" onclick="alert('Proposal flow initialized')">Submit Proposal</button></div></div>`).join('');
+}
+
+async function showInvestmentListingForm() {
+  const res = await fetch(API + '/companies', { headers });
+  const { companies } = await res.json();
+  const verifiedCompanies = companies.filter(c => c.isVerified);
+  
+  if (verifiedCompanies.length === 0) {
+    return alert('You must have a verified company to list for investment.');
+  }
+
+  document.getElementById('list-investment-form').style.display = 'block';
+  document.getElementById('invest-company-select').innerHTML = verifiedCompanies.map(c => `<option value="${c._id}">${c.name}</option>`).join('');
+}
+
+async function postInvestment() {
+  const companyId = document.getElementById('invest-company-select').value;
+  const seekingAmount = document.getElementById('invest-amount').value;
+  const equityOffered = document.getElementById('invest-equity').value;
+  const sector = document.getElementById('invest-sector').value;
+  const description = document.getElementById('invest-desc').value.trim();
+
+  if (!seekingAmount || !equityOffered) return alert('Amount and Equity are required');
+
+  const res = await fetch(API + '/investment/seek', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ companyId, seekingAmount, equityOffered, sector, description })
+  });
+
+  if (res.ok) {
+    alert('Investment opportunity listed!');
+    document.getElementById('list-investment-form').style.display = 'none';
+    loadInvestments();
+    loadMyOpportunities();
+  } else {
+    const data = await res.json();
+    alert('Error: ' + data.error);
+  }
+}
+
+async function loadMyOpportunities() {
+  const res = await fetch(API + '/investment/my-opportunities', { headers });
+  const { opportunities } = await res.json();
+  if (opportunities && opportunities.length > 0) {
+    document.getElementById('my-investments-section').style.display = 'block';
+    document.getElementById('my-investments-list').innerHTML = opportunities.map(o => `
+      <div class="dash-card glass-panel" style="border-left: 4px solid #fbbf24">
+        <div class="dash-card__header">
+          <div class="dash-card__title">${o.name}</div>
+          <span class="dash-badge ${o.escalationLevel === 'none' ? 'verified' : 'pending'}">${o.escalationLevel}</span>
+        </div>
+        <div class="dash-card__body">
+          <p>Raising: <b>₹${(o.investmentDetails?.seekingAmount||0).toLocaleString()}</b> for <b>${o.investmentDetails?.equityOffered}%</b></p>
+          <div style="margin-top:1rem; display:flex; gap:0.5rem">
+            <button class="btn btn--glass" style="font-size:0.8rem" onclick="alert('Manage representatives flow')">Add Rep</button>
+            <button class="btn btn--glass" style="font-size:0.8rem" onclick="alert('View interests flow')">Interests (${o.investorInterests?.length||0})</button>
+          </div>
+        </div>
+      </div>`).join('');
+  } else {
+    document.getElementById('my-investments-section').style.display = 'none';
+  }
+}
+
+async function loadInvestments() {
+  const res = await fetch(API + '/investment/opportunities', { headers });
+  const { opportunities } = await res.json();
+  document.getElementById('investments-list').innerHTML = (opportunities||[]).length === 0
+    ? '<div class="glass-panel dash-card" style="grid-column:1/-1;text-align:center"><p class="dash-card__body">No active investment opportunities.</p></div>'
+    : opportunities.map(o => {
+        const d = o.investmentDetails || {};
+        return `
+          <div class="dash-card glass-panel" style="border: 1px solid rgba(255,215,0,0.2)">
+            <div class="dash-card__header">
+              <div class="dash-card__icon" style="color:gold"><span class="material-symbols-outlined">attach_money</span></div>
+              <div class="dash-card__title">${o.name} <span style="color:#4ade80">✓</span></div>
+            </div>
+            <div class="dash-card__body">
+              <p>Seeking: <b>₹${(d.seekingAmount||0).toLocaleString()}</b> for <b>${d.equityOffered||0}%</b> Equity</p>
+              <div style="margin: 0.8rem 0; display:flex; gap:0.5rem; flex-wrap:wrap">
+                <span class="dash-badge verified" style="font-size:0.7rem">Founder Verified</span>
+                <span class="dash-badge verified" style="font-size:0.7rem">Anti-Broker Shield</span>
+              </div>
+              <p style="margin-top:.5rem;color:var(--on-surface-variant);font-size:0.85rem">Founder: ${o.owner?.name||'Verified Owner'}</p>
+              <p style="margin-top:.5rem">${(d.description||'').slice(0,100)}...</p>
+              <div style="display:flex; gap:0.5rem; margin-top:1rem;">
+                <button class="btn btn--gradient" style="flex:1" onclick="expressInvestmentInterest('${o._id}')">Express Interest</button>
+                <button class="btn btn--glass" onclick="showTrustLineage('${o._id}')"><span class="material-symbols-outlined">verified</span></button>
+              </div>
+            </div>
+          </div>`;
+      }).join('');
+}
+
+async function showTrustLineage(id) {
+  const res = await fetch(API + '/investment/trust/' + id, { headers });
+  const data = await res.json();
+  const modal = document.getElementById('trust-modal');
+  const content = document.getElementById('trust-modal-content');
+  
+  modal.style.display = 'block';
+  content.innerHTML = `
+    <div style="margin-bottom:1.5rem">
+      <div style="display:flex; align-items:center; gap:1rem; margin-bottom:1rem">
+        <div style="width:40px;height:40px;background:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff"><span class="material-symbols-outlined">person</span></div>
+        <div>
+          <div style="font-weight:700">${data.lineage.verifiedOwner}</div>
+          <div style="font-size:0.8rem;color:var(--on-surface-variant)">Verified Company Owner</div>
+        </div>
+      </div>
+      <div style="padding-left:20px; border-left: 2px solid var(--primary); margin-left:19px; padding-bottom:1rem">
+        <div style="font-size:0.85rem; background:rgba(255,255,255,0.05); padding:0.8rem; border-radius:8px">
+          <p>✓ Identity Document Verified</p>
+          <p>✓ Business Registry Approved</p>
+          <p>✓ Domain Email Sign-off Confirmed</p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:1rem; margin-top:0.5rem">
+        <div style="width:40px;height:40px;background:#4ade80;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#000"><span class="material-symbols-outlined">domain</span></div>
+        <div>
+          <div style="font-weight:700">${data.companyName}</div>
+          <div style="font-size:0.8rem;color:var(--on-surface-variant)">Verified Entity (Trust Score: ${data.trustIndicators.companyTrustScore})</div>
+        </div>
+      </div>
+    </div>
+    <div style="font-size:0.8rem; color:var(--on-surface-variant); border-top:1px solid rgba(255,255,255,0.1); padding-top:1rem">
+      ${data.safeguards.map(s => `<p style="margin-bottom:0.4rem">• ${s}</p>`).join('')}
+    </div>
+  `;
+}
+
+async function expressInvestmentInterest(id) {
+  const amount = prompt('Amount you are looking to invest (₹):', '1000000');
+  if (!amount) return;
+  const message = prompt('Message to the founder:');
+  
+  const res = await fetch(API + '/investment/interest/' + id, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({ amount, message })
+  });
+  
+  const data = await res.json();
+  if (res.ok) {
+    let contactInfo = '';
+    if (data.ownerContact) {
+      contactInfo = `\n\nDIRECT FOUNDER CONTACT UNLOCKED:\nName: ${data.ownerContact.name}\nLevel: ${data.ownerContact.verificationLevel}`;
+    }
+    alert(data.message + contactInfo);
+    
+    if (confirm('Direct connection established. Would you like to request an additional Direct-from-Domain Proof of Identity from the owner?')) {
+      await fetch(API + '/investment/interest/' + id + '/request-proof', { method: 'POST', headers });
+      alert('Proof request sent to founder.');
+    }
+  } else {
+    alert('Error: ' + data.error);
+  }
+}
+
+async function loadAI() {
+  try {
+    const [pRes, cRes] = await Promise.all([
+      fetch(API + '/ai/profile-tips', { headers }),
+      fetch(API + '/ai/campaign-tips', { headers })
+    ]);
+    const pData = await pRes.json();
+    const cData = await cRes.json();
+    
+    document.getElementById('ai-profile-tips').innerHTML = `
+      <div style="margin-bottom:1rem">
+        <div style="display:flex;justify-content:space-between;font-size:0.85rem;margin-bottom:0.3rem"><span>Profile Completeness</span><span>${pData.completeness}%</span></div>
+        <div style="width:100%;height:6px;background:rgba(255,255,255,0.1);border-radius:3px"><div style="width:${pData.completeness}%;height:100%;background:var(--primary);border-radius:3px"></div></div>
+      </div>
+      <ul style="padding-left:1.2rem">
+        ${(pData.tips||[]).map(t => `<li style="margin-bottom:0.5rem">${t.tip}</li>`).join('')}
+      </ul>`;
+
+    document.getElementById('ai-campaign-tips').innerHTML = `
+      <ul style="padding-left:1.2rem">
+        ${(cData.tips||[]).map(t => `<li style="margin-bottom:0.5rem">${t.tip}</li>`).join('')}
+      </ul>`;
+  } catch(e) {}
+}
+
+function logout() { localStorage.removeItem('syncup_token'); localStorage.removeItem('syncup_user'); window.location.href = '/login'; }
+</script>
+<!-- Company Verification Modal -->
+<div id="company-verify-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;align-items:center;justify-content:center;backdrop-filter:blur(5px)">
+  <div class="dash-card glass-panel" style="width:100%;max-width:500px;padding:2rem;position:relative">
+    <button class="btn btn--glass" style="position:absolute;top:1rem;right:1rem;padding:0.5rem" onclick="hideCompanyVerification()">✕</button>
+    <h2 style="margin-bottom:1rem">Verify Company Ownership</h2>
+    <p style="font-size:0.9rem;color:var(--on-surface-variant);margin-bottom:1.5rem">
+      To verify you own <strong id="company-verify-name" style="color:var(--primary)"></strong> (Website: <span id="company-verify-website"></span>), please provide your official domain email. If it doesn't match the company website, you must upload business registry documents for manual admin review.
+    </p>
+    <input type="hidden" id="company-verify-id" />
+    <div class="form-group" style="margin-bottom:1.5rem">
+      <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem">Official Domain Email</label>
+      <input type="email" class="form-input" id="company-verify-email" placeholder="you@companydomain.com" />
+    </div>
+    <div class="form-group" style="margin-bottom:1.5rem">
+      <label style="display:block;font-size:0.8rem;font-weight:600;margin-bottom:0.5rem">Supporting Documents (Optional if domain matches)</label>
+      <input type="file" class="form-input" id="company-verify-doc" style="padding:0.5rem" />
+    </div>
+    <button class="btn btn--gradient btn--full" onclick="submitCompanyVerification()">Submit Verification</button>
+    <div id="company-verify-result" style="margin-top:1rem;font-weight:600;font-size:0.9rem"></div>
+  </div>
+</div>
+</body>
+</html>
