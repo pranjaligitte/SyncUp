@@ -1,4 +1,4 @@
-# SyncUp — Verified Professional Ecosystem
+# SyncUp - Verified Professional Ecosystem
 
 > A trusted digital platform for professionals, companies, organisers, founders, recruiters, investors, and communities. Built for the **Devkraft Hackathon**.
 
