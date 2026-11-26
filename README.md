@@ -4,7 +4,7 @@
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Install dependencies
@@ -66,7 +66,7 @@ The server starts at **http://localhost:3000** with an in-memory MongoDB — zer
 
 ---
 
-## 🔧 Tech Stack
+## Tech Stack
 
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
@@ -80,7 +80,7 @@ The server starts at **http://localhost:3000** with an in-memory MongoDB — zer
 
 ---
 
-## 📋 10 Functional Pillars Coverage
+##  10 Functional Pillars Coverage
 
 ### ✅ Pillar 1: Verified Human Identity (Highest Priority)
 - **Face verification** using SSD MobileNet + 68-point landmarks
@@ -216,7 +216,7 @@ node tests/api-tests.js
 
 ---
 
-## 🔒 Security Implementation
+## Security Implementation
 - **bcrypt** with 12 salt rounds for password hashing
 - **JWT** tokens with 7-day expiry
 - **Rate limiting** configured via @fastify/rate-limit
